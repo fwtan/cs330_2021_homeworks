@@ -64,9 +64,12 @@ class MANN(nn.Module):
         #############################
         #### YOUR CODE GOES HERE ####
         #############################
-
         # SOLUTION:
+        x = input_images
+        y = input_labels.clone()
+        y[:,-1,:,:] = 0
 
+        return self.dnc(torch.cat((x, y), -1))[0] 
 
     def loss_function(self, preds, labels):
         """
@@ -84,8 +87,11 @@ class MANN(nn.Module):
         #############################
         #### YOUR CODE GOES HERE ####
         #############################
-
-        # SOLUTION:        
+        # SOLUTION:
+        # losses = torch.sum(-F.softmax(labels[:,-1,:,:]) * F.log_softmax(preds[:,-1,:,:]), -1)
+        losses = torch.sum(-labels[:,-1,:,:] * F.log_softmax(preds[:,-1,:,:]), -1)
+        # return torch.mean(losses.sum(dim=-1))
+        return torch.mean(losses)      
 
 
 
@@ -147,6 +153,7 @@ def main(config):
             writer.add_scalar('Meta-Test Accuracy', 
                               pred.eq(labels).double().mean().item(),
                               step)
+
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()

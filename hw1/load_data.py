@@ -58,7 +58,7 @@ class DataGenerator(object):
             
             num_samples_per_class: int
                 Number of samples per class in the support set (K-shot).
-                Will generate additional sample for the querry set.
+                Will generate additional sample for the query set.
                 
             device: cuda.device: 
                 Device to allocate tensors to.
@@ -120,5 +120,31 @@ class DataGenerator(object):
         #############################
         #### YOUR CODE GOES HERE ####
         #############################
+        K = self.num_samples_per_class
+        B = batch_size
+        N = self.num_classes
+        S = B * (K + 1)
+        sampled_classes = np.random.permutation(range(len(folders)))[:N]
+        sampled_folders = [folder[i] for i in sampled_classes]
+        raw_list = get_images(sampled_folders, range(N), S, shuffle=False)
+        images = []
+        for i in range(N):
+            images_per_class = []
+            for j in range(S*i, S*(i+1)):
+                images_per_class.append(image_file_to_array(raw_list[j][1], self.dim_input))
+            images_per_class = np.stack(images_per_class, 0).reshape((B, (K+1), self.dim_input))
+            images.append(images_per_class)
+        images = np.stack(images, 2)
+        labels = np.eye(N, dtype=int)[None,None,:,:]
+        labels = np.repeat(labels, B,   axis=0)
+        labels = np.repeat(labels, K+1, axis=1)
 
-        # SOLUTION:
+        val_images   = images[:,-1,:,:].copy()
+        val_labels   = labels[:,-1,:,:].copy()
+
+        for i in range(B):
+            inds = np.random.permutation(range(N))
+            labels[i, -1] = val_labels[i, inds]
+            images[i, -1] = val_images[i, inds]
+
+        return images, labels
