@@ -1,6 +1,7 @@
 import argparse
 import os
 import torch
+from tqdm import tqdm
 
 import torch.nn.functional as F
 
@@ -135,7 +136,7 @@ def main(config):
     model.to(device)
     optim = torch.optim.Adam(model.parameters(), lr = 1e-3)
     
-    for step in range(config.training_steps):
+    for step in tqdm(range(config.training_steps)):
         images, labels = data_generator.sample_batch('train', config.meta_batch_size)
         _, train_loss = train_step(images, labels, model, optim)
 
@@ -149,12 +150,14 @@ def main(config):
                                         config.num_classes])
             pred = torch.argmax(pred[:, -1, :, :], axis=2)
             labels = torch.argmax(labels[:, -1, :, :], axis=2)
+            accu = pred.eq(labels).double().mean().item()
             
             writer.add_scalar('Train Loss', train_loss.cpu().numpy(), step)
             writer.add_scalar('Test Loss', test_loss.cpu().numpy(), step)
             writer.add_scalar('Meta-Test Accuracy', 
-                              pred.eq(labels).double().mean().item(),
+                              accu,
                               step)
+            print('Step %d Accuracy %f'%(step, accu))
 
 
 if __name__=='__main__':
