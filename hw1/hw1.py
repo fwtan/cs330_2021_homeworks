@@ -65,11 +65,13 @@ class MANN(nn.Module):
         #### YOUR CODE GOES HERE ####
         #############################
         # SOLUTION:
+        B, K, N, D = input_images.shape
         x = input_images
         y = input_labels.clone()
         y[:,-1,:,:] = 0
-
-        return self.dnc(torch.cat((x, y), -1))[0] 
+        inputs = torch.cat((x, y), -1).transpose(1, 2).reshape((B, N*K, D+N))
+        outputs = self.dnc(inputs)[0]
+        return outputs.reshape((B, N, K, N)).transpose(1, 2)
 
     def loss_function(self, preds, labels):
         """
