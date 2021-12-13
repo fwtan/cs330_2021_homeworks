@@ -123,18 +123,15 @@ class DataGenerator(object):
         K = self.num_samples_per_class
         B = batch_size
         N = self.num_classes
-        S = B * (K + 1)
         sampled_classes = np.random.permutation(range(len(folders)))[:N]
         sampled_folders = [folders[i] for i in sampled_classes]
-        raw_list = get_images(sampled_folders, range(N), S, shuffle=False)
         images = []
-        for i in range(N):
-            images_per_class = []
-            for j in range(S*i, S*(i+1)):
-                images_per_class.append(image_file_to_array(raw_list[j][1], self.dim_input))
-            images_per_class = np.stack(images_per_class, 0).reshape((B, (K+1), self.dim_input))
-            images.append(images_per_class)
-        images = np.stack(images, 2)
+        for i in range(B):
+            batched_files  = get_images(sampled_folders, range(N), K+1, shuffle=False)
+            batched_images = [image_file_to_array(sample[1], self.dim_input) for sample in batched_files]    
+            batched_images = np.stack(batched_images, 0).reshape((K+1, N, self.dim_input))
+            images.append(batched_images)
+        images = np.stack(images, 0)
         labels = np.eye(N, dtype=int)[None,None,:,:]
         labels = np.repeat(labels, B,   axis=0)
         labels = np.repeat(labels, K+1, axis=1)
