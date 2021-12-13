@@ -81,7 +81,7 @@ class MultitaskModel(object):
                  l2=0.0,
                  learning_rate=1e-3,
                  optimizer_func=None,
-                 use_cuda=False,
+                 use_cuda=True,
                  representation=None,
                  sparse=False,
                  random_state=None):
