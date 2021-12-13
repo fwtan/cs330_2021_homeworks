@@ -144,4 +144,4 @@ class DataGenerator(object):
             labels[i, -1] = val_labels[i, inds]
             images[i, -1] = val_images[i, inds]
 
-        return torch.from_numpy(images).to(device), torch.from_numpy(labels).to(device) 
+        return torch.from_numpy(images).to(self.device), torch.from_numpy(labels).to(self.device) 
