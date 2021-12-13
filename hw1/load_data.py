@@ -129,7 +129,7 @@ class DataGenerator(object):
         for i in range(B):
             batched_files  = get_images(sampled_folders, range(N), K+1, shuffle=False)
             batched_images = [image_file_to_array(sample[1], self.dim_input) for sample in batched_files]    
-            batched_images = np.stack(batched_images, 0).reshape((K+1, N, self.dim_input))
+            batched_images = np.stack(batched_images, 0).reshape((N, K+1, self.dim_input)).transpose((1, 0, 2))
             images.append(batched_images)
         images = np.stack(images, 0)
         labels = np.eye(N, dtype=int)[None,None,:,:]
@@ -145,3 +145,35 @@ class DataGenerator(object):
             images[i, -1] = val_images[i, inds]
 
         return torch.from_numpy(images).to(self.device), torch.from_numpy(labels).to(self.device) 
+
+        # K = self.num_samples_per_class
+        # B = batch_size
+        # N = self.num_classes
+        # sampled_classes = np.random.permutation(range(len(folders)))[:N]
+        # sampled_folders = [folders[i] for i in sampled_classes]
+        # images, labels = [], []
+        # for i in range(B):
+        #     train_files  = get_images(sampled_folders, range(N), K, shuffle=False)
+        #     val_files    = get_images(sampled_folders, range(N), 1, shuffle=True)
+        #     train_images = [image_file_to_array(sample[1], self.dim_input) for sample in train_files]
+        #     val_images   = [image_file_to_array(sample[1], self.dim_input) for sample in val_files]
+        #     train_labels, val_labels = [], []
+        #     for sample in train_files:
+        #         onehot = np.zeros(N)
+        #         onehot[sample[0]] = 1
+        #         train_labels.append(onehot)
+        #     for sample in val_files:
+        #         onehot = np.zeros(N)
+        #         onehot[sample[0]] = 1
+        #         val_labels.append(onehot)
+        #     train_labels = np.stack(train_labels, 0).reshape((N, K, N)).transpose((1, 0, 2))
+        #     val_labels   = np.stack(val_labels, 0).reshape((1, N, N))
+        #     train_images = np.stack(train_images, 0).reshape((N, K, self.dim_input)).transpose((1, 0, 2))
+        #     val_images   = np.stack(val_images, 0).reshape((1, N, self.dim_input))
+        #     batched_images = torch.cat((train_images, val_images), 0)
+        #     batched_labels = torch.cat((train_labels, val_labels), 0)
+        #     images.append(batched_images)
+        #     labels.append(batched_labels)
+        # images = np.stack(images, 0)
+        # labels = np.stack(labels)        
+        # return torch.from_numpy(images).to(self.device), torch.from_numpy(labels).to(self.device) 
