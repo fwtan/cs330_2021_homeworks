@@ -125,7 +125,7 @@ class DataGenerator(object):
         N = self.num_classes
         S = B * (K + 1)
         sampled_classes = np.random.permutation(range(len(folders)))[:N]
-        sampled_folders = [folder[i] for i in sampled_classes]
+        sampled_folders = [folders[i] for i in sampled_classes]
         raw_list = get_images(sampled_folders, range(N), S, shuffle=False)
         images = []
         for i in range(N):
